@@ -3,126 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Content AI Chatbot</title>
+    <title>Event Management</title>
+    <style href = "styles.css"></style>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background: #121212;
-            color: #fff;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
             text-align: center;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            justify-content: center;
         }
-        h2 {
-            font-size: 28px;
-            margin-bottom: 15px;
-            color: #ff9800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        h1 {
+            color: #333;
         }
-        #chatbox {
-            width: 90%;
-            max-width: 500px;
-            height: 400px;
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            background: white;
             border-radius: 10px;
-            padding: 15px;
-            overflow-y: auto;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-            border: 2px solid #ff9800;
-            display: none;
-        }
-        .input-container {
-            display: flex;
-            gap: 10px;
-            width: 90%;
-            max-width: 500px;
-            margin-top: 15px;
-        }
-        input {
-            flex: 1;
-            padding: 12px;
-            border-radius: 5px;
-            border: none;
-            outline: none;
-            font-size: 16px;
-            background: #1e1e1e;
-            color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         button {
-            padding: 12px 15px;
+            background-color: #007BFF;
+            color: white;
             border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            padding: 10px 15px;
+            margin: 10px;
             font-size: 16px;
-            background: #ff9800;
-            color: #000;
-            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
             transition: 0.3s;
         }
         button:hover {
-            background: #e68900;
+            background-color: #0056b3;
         }
-        #startChatbot {
-            margin-bottom: 20px;
-            font-size: 18px;
-            padding: 12px 20px;
+        .data-container {
+            margin-top: 20px;
+            text-align: left;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            text-align: left;
+        }
+        .search-box {
+            margin: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        input {
+            padding: 10px;
+            width: 200px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
     </style>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function fetchData(type) {
+            fetch(`http://127.0.0.1:8000/${type}/`)
+                .then(response => response.json())
+                .then(data => {
+                    let output = `<h2>${type.charAt(0).toUpperCase() + type.slice(1)} Data</h2><pre>` + JSON.stringify(data, null, 2) + `</pre>`;
+                    document.getElementById("data-container").innerHTML = output;
+                })
+                .catch(error => {
+                    document.getElementById("data-container").innerHTML = `<p style="color:red;">Error loading ${type} data.</p>`;
+                });
+        }
+
+        function searchStudentTasks() {
+            let studentNameInput = document.getElementById("student-search-input");
+            let studentName = studentNameInput.value.trim();
+            if (studentName === "") {
+                alert("Please enter a student name!");
+                return;
+            }
+            fetch(`http://127.0.0.1:8000/assign-tasks/${studentName}`)
+                .then(response => response.json())
+                .then(data => {
+                    let output = `<h2>Tasks for ${studentName}</h2><pre>` + JSON.stringify(data, null, 2) + `</pre>`;
+                    document.getElementById("data-container").innerHTML = output;
+                    studentNameInput.value = "";  // Clear input field
+                })
+                .catch(error => {
+                    document.getElementById("data-container").innerHTML = `<p style="color:red;">Error loading student tasks.</p>`;
+                });
+        }
+
+        function searchEventMembers() {
+            let eventNameInput = document.getElementById("event-search-input");
+            let eventName = eventNameInput.value.trim();
+            if (eventName === "") {
+                alert("Please enter an event name!");
+                return;
+            }
+            fetch(`http://127.0.0.1:8000/events/${eventName}`)
+                .then(response => response.json())
+                .then(data => {
+                    let output = `<h2>Members for Event: ${eventName}</h2><pre>` + JSON.stringify(data, null, 2) + `</pre>`;
+                    document.getElementById("data-container").innerHTML = output;
+                    eventNameInput.value = "";  // Clear input field
+                })
+                .catch(error => {
+                    document.getElementById("data-container").innerHTML = `<p style="color:red;">Error loading event members.</p>`;
+                });
+        }
+
+        document.getElementById("students-btn").addEventListener("click", () => fetchData("students"));
+        document.getElementById("tasks-btn").addEventListener("click", () => fetchData("tasks"));
+        document.getElementById("events-btn").addEventListener("click", () => fetchData("events"));
+        document.getElementById("search-student-btn").addEventListener("click", searchStudentTasks);
+        document.getElementById("search-event-btn").addEventListener("click", searchEventMembers);
+    });
+</script>
+
 </head>
 <body>
 
-    <h2>🚀 Content AI Chatbot</h2>
-    <button id="startChatbot" onclick="startBackend()">Start Chatbot</button>
-    <div id="chatbox"></div>
+    <h1>Event Management System</h1>
+    <div class="container">
+        <button id="students-btn">Load Students</button>
+        <button id="tasks-btn">Load Tasks</button>
+        <button id="events-btn">Load Events</button>
 
-    <div class="input-container" style="display: none;" id="inputArea">
-        <input type="text" id="userInput" placeholder="Ask anything about content creation...">
-        <button onclick="sendMessage()">Send</button>
+        <div class="search-box">
+            <input type="text" id="student-search-input" placeholder="Enter Student Name">
+            <button id="search-student-btn">Search Student Tasks</button>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="event-search-input" placeholder="Enter Event Name">
+            <button id="search-event-btn">Search Event Members</button>
+        </div>
+
+        <div class="data-container" id="data-container"></div>
     </div>
-
-    <script>
-        async function startBackend() {
-            try {
-                // Check if the server is running
-                const response = await fetch("http://127.0.0.1:8081")
-                    .then(() => {
-                        document.getElementById("chatbox").style.display = "block";
-                        document.getElementById("inputArea").style.display = "flex";
-                        document.getElementById("startChatbot").style.display = "none";
-                    })
-                    .catch(() => alert("Please run the backend server first!"));
-            } catch (error) {
-                console.error("Error starting backend:", error);
-            }
-        }
-
-        async function sendMessage() {
-            const userInput = document.getElementById("userInput").value;
-            if (!userInput.trim()) return;
-
-            const chatbox = document.getElementById("chatbox");
-
-            chatbox.innerHTML += `<p><b>You:</b> ${userInput}</p>`;
-            document.getElementById("userInput").value = "";
-
-            try {
-                const response = await fetch(`http://127.0.0.1:8081/chat?message=${encodeURIComponent(userInput)}`);
-                const data = await response.json();
-                
-                chatbox.innerHTML += `<p><b>AI:</b> ${data.response}</p>`;
-                chatbox.scrollTop = chatbox.scrollHeight;
-            } catch (error) {
-                chatbox.innerHTML += `<p style="color: red;"><b>Error:</b> Could not connect to AI.</p>`;
-            }
-        }
-    </script>
 
 </body>
 </html>
